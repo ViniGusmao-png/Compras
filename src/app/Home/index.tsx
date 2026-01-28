@@ -2,7 +2,6 @@ import { View, Image } from "react-native";
 import { style } from "./style";
 import { Button } from "@/components/button";
 
-
 export function Home() {
   return (
     <View style={style.container}>
