@@ -48,5 +48,25 @@ export const style = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#e86304',
     paddingBottom: 8,
+  },
+
+  separator: {
+    width: "100%",
+    height: 1,
+    backgroundColor: "#EEF0F5",
+    marginVertical: 16,
+  },
+
+  listContent: {
+    paddingTop: 24,
+    paddingBottom: 62
+  },
+
+  empty: {
+    fontSize: 18,
+    color: "#808080",
+    textAlign: "center"
   }
+
+
 })
