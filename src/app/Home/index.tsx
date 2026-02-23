@@ -31,7 +31,7 @@ export function Home() {
   const [description, setDescription] = useState("");
   const [items, setItems] = useState<any>([]);
 
-  function handleAdd() {
+  async function handleAdd() {
     if (!description.trim()) {
       return Alert.alert("Adicionar", "Informe a descrição para adicionar.");
     }
@@ -42,12 +42,16 @@ export function Home() {
       status: FilterStatus.PENDDING,
     };
 
-    setItems([newItem]);
+    await itemsStorage.add(newItem);
+    await itemsByStatus();
+
+    Alert.alert("Adicionado", `Adicionado ${description}`);
+    setDescription("");
   }
 
-  async function getItems() {
+  async function itemsByStatus() {
     try {
-      const response = await itemsStorage.get();
+      const response = await itemsStorage.getByStatus(filter);
       setItems(response);
     } catch (error) {
       Alert.alert("Erro", "Não foi possivel filtrar os itens.");
@@ -55,8 +59,8 @@ export function Home() {
   }
 
   useEffect(() => {
-    getItems();
-  }, []);
+    itemsByStatus();
+  }, [filter]);
 
   return (
     <View style={style.container}>
@@ -91,7 +95,7 @@ export function Home() {
           renderItem={({ item }) => (
             <Item
               data={item}
-              onRemove={() => console.log("remova")}
+              onRemove={() => setItems}
               onStatus={() => console.log("muda o status")}
             />
           )}
