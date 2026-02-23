@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { FilterStatus } from "@/types/FilterStatus"
+import { Filter } from "@/components/Filter";
 
 const ITEMS_STORAGE_KEY = "@comprar:items"
 
@@ -19,13 +20,61 @@ async function get(): Promise<ItemStorage[]> {
     }
 }
 
-async function getByStatu(status: FilterStatus): Promise<ItemStorage[]> {
+async function save(items: ItemStorage[]): Promise<void> {
+    try {
+        await AsyncStorage.setItem(ITEMS_STORAGE_KEY, JSON.stringify(items))
+    }
+    catch (error) {
+        throw new Error("ITEM_SAVE" + error)
+    }
+}
+
+async function add(newItems: ItemStorage): Promise<ItemStorage[]> {
+    const items = await get()
+    const updatedItems = [...items, newItems]
+    await save(updatedItems)
+    return updatedItems
+
+}
+
+async function getByStatus(status: FilterStatus): Promise<ItemStorage[]> {
     const items = await get()
     return items.filter((item) => item.status === status)
 
 }
 
+async function remove(id: string): Promise<void> {
+    const items = await get()
+    const updatedItems = items.filter((item) => item.id !== id)
+    await save(updatedItems)
+}
+
+async function clear(): Promise<void> {
+    try {
+        await AsyncStorage.removeItem(ITEMS_STORAGE_KEY)
+    } catch (error) {
+        throw new Error("ITEMS_CLEAR" + error)
+    }
+}
+
+async function newStatus(id: string): Promise<void> {
+    const items = await get()
+
+    const updatedItems = items.map((item) => item.id === id ? {
+        ...item, status: item.status === FilterStatus.PENDDING ? FilterStatus.DONE : FilterStatus.PENDDING
+    } : item
+
+
+    )
+    await save(updatedItems)
+
+}
+
 export const itemsStorage = {
     get,
-    getByStatu,
+    getByStatus,
+    add,
+    remove,
+    clear,
+    newStatus
 }

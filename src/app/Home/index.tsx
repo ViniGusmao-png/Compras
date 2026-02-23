@@ -31,7 +31,7 @@ export function Home() {
   const [description, setDescription] = useState("");
   const [items, setItems] = useState<any>([]);
 
-  function handleAdd() {
+  async function handleAdd() {
     if (!description.trim()) {
       return Alert.alert("Adicionar", "Informe a descrição para adicionar.");
     }
@@ -42,21 +42,65 @@ export function Home() {
       status: FilterStatus.PENDDING,
     };
 
-    setItems([newItem]);
+    await itemsStorage.add(newItem);
+    await itemsByStatus();
+
+    Alert.alert("Adicionado", `Adicionado ${description}`);
+    setDescription("");
   }
 
-  async function getItems() {
+  async function itemsByStatus() {
     try {
-      const response = await itemsStorage.get();
+      const response = await itemsStorage.getByStatus(filter);
       setItems(response);
     } catch (error) {
       Alert.alert("Erro", "Não foi possivel filtrar os itens.");
     }
   }
 
+  async function handleRemove(id: string) {
+    try {
+      await itemsStorage.remove(id);
+      await itemsByStatus();
+    } catch (erro) {
+      Alert.alert("Remover", "Deu ruim meu amigo");
+    }
+  }
+
+  function handleClear() {
+    Alert.alert("Cuidado", "Você deseja limpar a lista?", [
+      {
+        text: "Não",
+        style: "cancel",
+      },
+      {
+        text: "Aham",
+        onPress: () => onClear(),
+      },
+    ]);
+  }
+
+  async function onClear() {
+    try {
+      await itemsStorage.clear();
+      setItems([]);
+    } catch (error) {
+      Alert.alert("Erro", "Não deu");
+    }
+  }
+
+  async function handleToogleStatu(id: string) {
+    try {
+      await itemsStorage.newStatus(id);
+      await itemsByStatus();
+    } catch (error) {
+      Alert.alert("Erro", "Dá não");
+    }
+  }
+
   useEffect(() => {
-    getItems();
-  }, []);
+    itemsByStatus();
+  }, [filter]);
 
   return (
     <View style={style.container}>
@@ -81,7 +125,10 @@ export function Home() {
             />
           ))}
 
-          <TouchableOpacity style={style.clearButton}>
+          <TouchableOpacity
+            style={style.clearButton}
+            onPress={() => handleClear()}
+          >
             <Text style={style.clearButtonText}>Limpar</Text>
           </TouchableOpacity>
         </View>
@@ -91,8 +138,8 @@ export function Home() {
           renderItem={({ item }) => (
             <Item
               data={item}
-              onRemove={() => console.log("remova")}
-              onStatus={() => console.log("muda o status")}
+              onRemove={() => handleToogleStatu(item.id)}
+              onStatus={() => handleRemove(item.id)}
             />
           )}
           showsVerticalScrollIndicator={false}
