@@ -58,6 +58,15 @@ export function Home() {
     }
   }
 
+  async function handleRemove(id: string) {
+    try {
+      await itemsStorage.remove(id);
+      await itemsByStatus();
+    } catch (erro) {
+      Alert.alert("Remover", "Deu ruim meu amigo");
+    }
+  }
+
   useEffect(() => {
     itemsByStatus();
   }, [filter]);
@@ -96,7 +105,7 @@ export function Home() {
             <Item
               data={item}
               onRemove={() => setItems}
-              onStatus={() => console.log("muda o status")}
+              onStatus={() => handleRemove(item.id)}
             />
           )}
           showsVerticalScrollIndicator={false}
