@@ -67,6 +67,37 @@ export function Home() {
     }
   }
 
+  function handleClear() {
+    Alert.alert("Cuidado", "Você deseja limpar a lista?", [
+      {
+        text: "Não",
+        style: "cancel",
+      },
+      {
+        text: "Aham",
+        onPress: () => onClear(),
+      },
+    ]);
+  }
+
+  async function onClear() {
+    try {
+      await itemsStorage.clear();
+      setItems([]);
+    } catch (error) {
+      Alert.alert("Erro", "Não deu");
+    }
+  }
+
+  async function handleToogleStatu(id: string) {
+    try {
+      await itemsStorage.newStatus(id);
+      await itemsByStatus();
+    } catch (error) {
+      Alert.alert("Erro", "Dá não");
+    }
+  }
+
   useEffect(() => {
     itemsByStatus();
   }, [filter]);
@@ -94,7 +125,10 @@ export function Home() {
             />
           ))}
 
-          <TouchableOpacity style={style.clearButton}>
+          <TouchableOpacity
+            style={style.clearButton}
+            onPress={() => handleClear()}
+          >
             <Text style={style.clearButtonText}>Limpar</Text>
           </TouchableOpacity>
         </View>
@@ -104,7 +138,7 @@ export function Home() {
           renderItem={({ item }) => (
             <Item
               data={item}
-              onRemove={() => setItems}
+              onRemove={() => handleToogleStatu(item.id)}
               onStatus={() => handleRemove(item.id)}
             />
           )}

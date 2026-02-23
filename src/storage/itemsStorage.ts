@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { FilterStatus } from "@/types/FilterStatus"
+import { Filter } from "@/components/Filter";
 
 const ITEMS_STORAGE_KEY = "@comprar:items"
 
@@ -48,9 +49,32 @@ async function remove(id: string): Promise<void> {
     await save(updatedItems)
 }
 
+async function clear(): Promise<void> {
+    try {
+        await AsyncStorage.removeItem(ITEMS_STORAGE_KEY)
+    } catch (error) {
+        throw new Error("ITEMS_CLEAR" + error)
+    }
+}
+
+async function newStatus(id: string): Promise<void> {
+    const items = await get()
+
+    const updatedItems = items.map((item) => item.id === id ? {
+        ...item, status: item.status === FilterStatus.PENDDING ? FilterStatus.DONE : FilterStatus.PENDDING
+    } : item
+
+
+    )
+    await save(updatedItems)
+
+}
+
 export const itemsStorage = {
     get,
     getByStatus,
     add,
     remove,
+    clear,
+    newStatus
 }
